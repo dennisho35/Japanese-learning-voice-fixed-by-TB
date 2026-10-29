@@ -1,0 +1,22 @@
+name: Build Japanese Step by Step v2.3 APK
+on:
+  push:        { branches: ["**"] }
+  pull_request:
+  workflow_dispatch:    # 手動觸發
+
+permissions:
+  contents: read        # 最小權限
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - checkout@v4
+      - setup-java@v4 (JDK 17, Temurin)
+      - android-actions/setup-android@v3   # 接受 SDK 授權
+      - 產生 local.properties（sdk.dir=$ANDROID_HOME）
+      - gradle/actions/setup-gradle@v4      # 依賴快取
+      - ./gradlew assembleDebug assembleRelease --no-daemon
+      - upload-artifact@v4                  # 上傳 Debug + Release APK
+  summary:                                 # 建置結果摘要
+    needs: build-apk
